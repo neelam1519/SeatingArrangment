@@ -1,4 +1,8 @@
 package com.neelam.find_any_flutter;
 
-public class MainActivity {
+
+import io.flutter.embedding.android.FlutterActivity;
+
+public class MainActivity  extends FlutterActivity {
+
 }
