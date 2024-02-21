@@ -1,4 +1,5 @@
 import 'package:find_any_flutter/soc_admin_seating_arrangment.dart';
+import 'package:find_any_flutter/soc_students.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -8,7 +9,12 @@ class SocAdminPage extends StatefulWidget {
 }
 
 class _SocAdminPageState extends State<SocAdminPage> {
-  TextEditingController _textEditingController = TextEditingController();
+  TextEditingController _text1EditingController = TextEditingController();
+  TextEditingController _text2EditingController = TextEditingController();
+  TextEditingController _text3EditingController = TextEditingController();
+
+  String selectedValue1 = 'Option 1';
+  String selectedValue2 = 'Option A';
   List<String> savedTexts = [];
 
   @override
@@ -38,10 +44,83 @@ class _SocAdminPageState extends State<SocAdminPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter Text'),
-          content: TextField(
-            controller: _textEditingController,
-            decoration: InputDecoration(labelText: 'Type something...'),
+          title: Text(
+            'Enter Texts',
+            style: TextStyle(fontSize: 20, fontFamily: 'Roboto'),
+          ),
+          content: Container(
+            constraints: BoxConstraints(maxHeight: 300), // Set a maximum height
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _text1EditingController,
+                    decoration: InputDecoration(labelText: 'Enter the Name'),
+                  ),
+                  TextField(
+                    controller: _text2EditingController,
+                    decoration: InputDecoration(
+                        labelText: 'Enter the date of Examination'),
+                  ),
+                  TextField(
+                    controller: _text3EditingController,
+                    decoration: InputDecoration(
+                        labelText: 'Enter the Time of the Examination'),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    child: DropdownButton<String>(
+                      value: selectedValue1,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedValue1 = newValue!;
+                        });
+                      },
+                      items: <String>[
+                        'Option 1',
+                        'Option 2',
+                        'Option 3',
+                        'Option 4'
+                      ].map<DropdownMenuItem<String>>(
+                        (String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        },
+                      ).toList(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    child: DropdownButton<String>(
+                      value: selectedValue2,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedValue2 = newValue!;
+                        });
+                      },
+                      items: <String>[
+                        'Option A',
+                        'Option B',
+                        'Option C',
+                        'Option D'
+                      ].map<DropdownMenuItem<String>>(
+                        (String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        },
+                      ).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -52,16 +131,15 @@ class _SocAdminPageState extends State<SocAdminPage> {
             ),
             TextButton(
               onPressed: () async {
-                String enteredText = _textEditingController.text;
-                print('Entered Text: $enteredText');
+                String enteredText1 = _text1EditingController.text;
+                String enteredText2 = _text2EditingController.text;
+                String enteredText3 = _text3EditingController.text;
 
-                // Add the entered text to the beginning of the list
-                setState(() {
-                  savedTexts.insert(0, enteredText);
-                });
-
-                // Save to Firestore
-                await _saveToFirestore(enteredText);
+                print('Entered Text 1: $enteredText1');
+                print('Entered Text 2: $enteredText2');
+                print('Entered Text 3: $enteredText3');
+                print('Selected Value 1: $selectedValue1');
+                print('Selected Value 2: $selectedValue2');
 
                 // Close the dialog
                 Navigator.of(context).pop();
@@ -75,7 +153,6 @@ class _SocAdminPageState extends State<SocAdminPage> {
   }
 
   Widget _buildSavedTextButtons() {
-
     return Expanded(
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('SOC_FILES').snapshots(),
@@ -105,7 +182,8 @@ class _SocAdminPageState extends State<SocAdminPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SocAdminSeatingArrangement(documentname: text),
+                            builder: (context) =>
+                                SocAdminSeatingArrangement(documentname: text),
                           ),
                         );
                       },
@@ -133,7 +211,9 @@ class _SocAdminPageState extends State<SocAdminPage> {
     try {
       // Check if the index is within the valid range
       if (index >= 0 && index < savedTexts.length) {
-        var document = FirebaseFirestore.instance.collection('SOC_FILES').doc(savedTexts[index]);
+        var document = FirebaseFirestore.instance
+            .collection('SOC_FILES')
+            .doc(savedTexts[index]);
 
         // Delete the document from Firestore
         await document.delete();
@@ -151,7 +231,6 @@ class _SocAdminPageState extends State<SocAdminPage> {
     }
   }
 
-
   Future<void> _saveToFirestore(String text) async {
     try {
       print('Saving to Firestore: $text');
@@ -160,7 +239,8 @@ class _SocAdminPageState extends State<SocAdminPage> {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
 
       // Collection reference
-      CollectionReference socFilesCollection = firestore.collection('SOC_FILES');
+      CollectionReference socFilesCollection =
+          firestore.collection('SOC_FILES');
 
       // Explicitly set the document name as the entered text
       DocumentReference documentReference = socFilesCollection.doc(text);
